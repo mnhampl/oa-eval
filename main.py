@@ -819,8 +819,24 @@ def dubletten(iterates, masterList, dois, kons):
     j = len(nowList)
     print(datenbanken[iterates].name, \
           ' - number of records removed via DOI-matching: ', i-j)
+    nowList_before_removal_author_title = nowList.copy()
     nowList = [item for item in nowList if item.authors is not None
                                         and item.konsonanten() not in f]
+    
+    # the duplicates that are removed may have a DOI while the remaining duplicate does not have one.
+    # in this case copy the DOI of the removed duplicate to the reamining item
+    removed_by_author_title_with_DOI = [x for x in nowList_before_removal_author_title if x not in nowList and x.DOI]
+    removed_temp = {}
+    for item in removed_by_author_title_with_DOI:
+        removed_temp[item.konsonanten()] = item
+    
+    for item in masterList:
+        if item.konsonanten() in removed_temp:
+            if not item.DOI:
+                item.DOI = removed_temp[item.konsonanten()].DOI
+                print ('---- added DOI from duplicate!')
+    # ----
+
     k = len(nowList)
     print(datenbanken[iterates].name, \
           ' - number of records removed via title/author-matching: ', j-k)
@@ -1199,20 +1215,25 @@ elif not doReadIn:
         finalList = pickle.load(f)
 
 # Check for duplicates within a database via DOI-matching
-seen = set()
-seen1 = set()
+seen_doi = set()
+seen_author_title = set()
+first_item_by_author_title = {}
 doubles = []
 for x in finalList:
     if x.DOI != '' and x.DOI is not None:
-        if x.DOI not in seen:
-            seen.add(x.DOI)
+        if x.DOI not in seen_doi:
+            seen_doi.add(x.DOI)
         else:
             doubles.append(x)
     else:
-        if x.konsonanten() not in seen1:
-            seen1.add(x.konsonanten())
+        if x.konsonanten() not in seen_author_title:
+            seen_author_title.add(x.konsonanten())
+            first_item_by_author_title[x.konsonanten()] = x
         else:
             doubles.append(x)
+            if not first_item_by_author_title[x.konsonanten()].DOI:
+                first_item_by_author_title[x.konsonanten()].DOI = x.DOI
+                print ('---- added DOI from duplicate!')
 for item in doubles:
     if item in finalList:
         finalList.remove(item)
