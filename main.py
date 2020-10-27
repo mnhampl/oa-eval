@@ -22,6 +22,8 @@ import os
 import re
 import itertools
 
+from data_corrections_berlin_2019 import replace_incorrect_dois
+
 # ----------------- 1. Enable/Disable Functionalities -------------------------
 
 # Detailed instructions for querying databases and preparing DOAJ data
@@ -1199,6 +1201,12 @@ if doReadIn:
         del allPubs_temp
 
 
+# ----
+# Datenkorrekturen Berlin 2019
+replace_incorrect_dois(datenbanken)
+# ----
+
+
         
 # ----------------------- 5. Duplicate Check ----------------------------------
 
@@ -1247,6 +1255,8 @@ finalList = [item for item in finalList if item.year is not '' and int(item.year
              and int(item.year) <= yearMax]
 l2 = len(finalList)
 print('Removed ', l1 - l2, ' records that do not fit the specified time frame')
+
+print('Number of records remainig: ', len(finalList))
 
 # Shortens author-list and affiliations when very long - otherwise causes
 # problems with Excel-Import
