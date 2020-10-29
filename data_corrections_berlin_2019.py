@@ -7,7 +7,9 @@ def replace_incorrect_dois(datenbanken):
     }
     
     for db in datenbanken:
-        for item in db.content:
-            if item.DOI in dois_to_replace:
-                item.DOI = dois_to_replace[item.DOI]
-                print('DOI replaced')
+        for dokument in db.content:
+            if dokument.DOI in dois_to_replace:
+                dokument.DOI = dois_to_replace[dokument.DOI]
+                # Bearbeitungsnotiz
+                dokument.notes += 'DOI corrected manually. '
+                print('DOI corrected manually. ')

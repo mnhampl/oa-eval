@@ -107,7 +107,7 @@ def save_publications_data_to_file(document_list, filename_out):
             'affiliations\tall identified name variants\tcorresponding author\t'        + \
             'found name variant\te-mail\tsubject\tDOAJ subject\tfunding\tlicence\t'     + \
             'databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t' + \
-            'oaDOI[license]\tAPC Amount\tAPC Currency'
+            'oaDOI[license]\tAPC Amount\tAPC Currency\tnotes'
 
         f.write(ch + '\n')
 
@@ -139,6 +139,7 @@ class Document(object):
     oaDOI2 = ''
     oaDOI3 = ''
     oaDOI4 = ''
+    notes = '' # Bearbeitungsnotizen
 
     def __init__(self, authors, title, DOI, journal, ISSN, eISSN, publisher,
                  year, affiliations, corrAuth, eMail, subject, funding, dbID):
@@ -172,7 +173,7 @@ class Document(object):
                 self.nameVariant, self.eMail, self.subject, self.doajSubject,
                 self.funding, self.lizenz, dbNameID[self.dbID], self.checks,
                 self.oaDOI1, self.oaDOI2, self.oaDOI3, self.oaDOI4,
-                self.APCValue, self.APCCurrency]
+                self.APCValue, self.APCCurrency, self.notes]
 
 # Function that takes consonants from a title and turns them into a string
 # INPUT: title of a publication (string)
@@ -834,10 +835,10 @@ def dubletten(iterates, masterList, dois, kons):
     
     for item in masterList:
         if item.konsonanten() in removed_temp:
-            if not item.DOI:
+            if not item.DOI and removed_temp[item.konsonanten()].DOI:
                 item.DOI = removed_temp[item.konsonanten()].DOI
-                print ('---- added DOI from duplicate!')
-    # ----
+                item.notes += 'DOI added from duplicate! '
+                print ('---- DOI added from duplicate!')
 
     k = len(nowList)
     print(datenbanken[iterates].name, \
@@ -1239,9 +1240,11 @@ for x in finalList:
             first_item_by_author_title[x.konsonanten()] = x
         else:
             doubles.append(x)
-            if not first_item_by_author_title[x.konsonanten()].DOI:
+            if not first_item_by_author_title[x.konsonanten()].DOI and x.DOI:
                 first_item_by_author_title[x.konsonanten()].DOI = x.DOI
-                print ('---- added DOI from duplicate!')
+                # add comment
+                first_item_by_author_title[x.konsonanten()].notes += 'DOI added from duplicate (within db)! '
+                print ('---- DOI added from duplicate (within db)! ')
 for item in doubles:
     if item in finalList:
         finalList.remove(item)
